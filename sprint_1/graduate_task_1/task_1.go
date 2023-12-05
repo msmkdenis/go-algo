@@ -39,41 +39,68 @@ func main() {
 		}
 	}
 	length, _ := strconv.Atoi(s[0])
-	data := makeIntSlice(s[1], length)
+	data, isZeroSlice := makeIntSlice(s[1], length)
 
-	zeroCounter := 0
-	distance := make([]int, length)
+	zeroIndexes := make([]int, 0)
 	for i, v := range data {
 		if v == 0 {
-			if zeroCounter == 0 {
-				zeroCounter++
-				k := 0
-				for i >= 0 {
-					distance[k] = i
-					i--
-					k++
-				}
-				rightDistance := 1
-				for k < length {
-					distance[k] = rightDistance
-					k++
-					rightDistance++
-				}
-			} else {
-				zeroCounter++
-				k := 0
-				for i >= 0 {
-					if distance[k] > i {
+			zeroIndexes = append(zeroIndexes, i)
+		}
+	}
+
+	distance := make([]int, length)
+	if isZeroSlice {
+		for i, _ := range data {
+			distance[i] = 0
+		}
+	} else {
+		zeroCounter := 0
+		previousZero := 0
+		for i, v := range data {
+			if v == 0 {
+				if zeroCounter == 0 {
+					zeroCounter++
+					k := 0
+					previousZero = i
+					for i >= 0 {
 						distance[k] = i
+						i--
+						k++
 					}
-					i--
-					k++
-				}
-				rightDistance := 1
-				for k < length {
-					distance[k] = rightDistance
-					k++
-					rightDistance++
+					rightDistance := 1
+					for k < length {
+						distance[k] = rightDistance
+						k++
+						rightDistance++
+					}
+				} else {
+					zeroCounter++
+					k := previousZero
+					l := i - previousZero
+					for l >= 0 {
+						if distance[k] > l {
+							distance[k] = l
+						}
+						l--
+						k++
+					}
+					index := zeroCounter
+					if index+1 <= len(zeroIndexes)-1 {
+						rightDistance := 1
+						for k < zeroIndexes[index+1] {
+							distance[k] = rightDistance
+							k++
+							rightDistance++
+						}
+					} else {
+						rightDistance := 1
+						for k < length {
+							distance[k] = rightDistance
+							k++
+							rightDistance++
+						}
+					}
+					previousZero = i
 				}
 			}
 		}
@@ -91,11 +118,15 @@ func main() {
 	fmt.Println(res.String())
 }
 
-func makeIntSlice(s string, len int) []int {
+func makeIntSlice(s string, len int) ([]int, bool) {
 	result := make([]int, 0, len)
+	isZeroSlice := true
 	for _, v := range strings.Split(s, " ") {
 		i, _ := strconv.Atoi(v)
+		if i != 0 {
+			isZeroSlice = false
+		}
 		result = append(result, i)
 	}
-	return result
+	return result, isZeroSlice
 }
