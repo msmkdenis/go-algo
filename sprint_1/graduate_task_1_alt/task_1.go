@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// https://contest.yandex.ru/contest/22450/run-report/102242196/
+// https://contest.yandex.ru/contest/22450/run-report/102337928/
 
 /*
 Тимофей ищет место, чтобы построить себе дом.
@@ -26,66 +26,47 @@ import (
 */
 
 func main() {
-	const maxCapacity = 10240 * 1024
+	const maxCapacity = 10 * 1024 * 1024
 	buf := make([]byte, maxCapacity)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(buf, maxCapacity)
 
-	var s []string
+	var inputData []string
 	for scanner.Scan() {
 		line := scanner.Text()
-		s = append(s, line)
+		inputData = append(inputData, line)
 		if line == "" {
 			break
 		}
 	}
-	length, _ := strconv.Atoi(s[0])
-	data, isZeroSlice := makeIntSlice(s[1], length)
+	length, _ := strconv.Atoi(inputData[0])
+	homeAddresses := makeIntSlice(inputData[1], length)
 
 	distance := make([]int, length)
-	if isZeroSlice { // проверка на граничный случай - если в слайсе только нули
-		for i, _ := range data {
-			distance[i] = 0
-		}
-	} else {
-		// первичное составление слайса расстояний
-		// двигаемся слева направо по слайсу адресов
-		a := -1                  // используем -1 пока не встретим 0 (-1 расстояние невозможно - заменим)
-		fromLeftZeroCounter := 0 // счетчик, чтобы понять, что встретили 0 и -1 не надо использовать
-		fromLeftCounter := 0     // счетчик расстояний слева
-		for i, v := range data {
-			if v != 0 && fromLeftZeroCounter == 0 { // если не 0 и 0 не встречался ставим -1
-				distance[i] = a
-			} else if v == 0 { // если 0 - ставим 0 в расстояние и сбрасываем счетчик расстояний
-				fromLeftZeroCounter++ // флаг встретившегося 0
-				distance[i] = 0
-				fromLeftCounter = 0
-			} else {
-				fromLeftCounter++ // увеличиваем счетчик расстояний справа от 0 и ставим его в слайс
-				distance[i] = fromLeftCounter
-			}
-		}
 
-		//идем справа налево по слайсу расстояний
-		fromRightZeroCounter := 0
-		fromRightCounter := 0
-		for i := len(distance) - 1; i >= 0; i-- {
-			if distance[i] != 0 && fromRightZeroCounter == 0 { // если не 0 и 0 не встречался пропускаем шаг (мы все еще не дошли до 0)
-				continue
-			} else if distance[i] == 0 { // если расстояние 0 - обновляем счетчик встреченных 0 и очищаем счетчик расстояний
-				fromRightZeroCounter++
-				fromRightCounter = 0
-			} else {
-				fromRightCounter++                                       // увеличиваем счетчик расстояний
-				if distance[i] > fromRightCounter || distance[i] == -1 { // если расстояние больше текущего счетчика или равно -1 заменяем
-					distance[i] = fromRightCounter
-				}
+	counter := len(homeAddresses)
+	for i, v := range homeAddresses {
+		if v == 0 {
+			counter = 0
+		} else {
+			counter++
+			distance[i] = counter
+		}
+	}
+
+	counter = len(homeAddresses)
+	for i := len(homeAddresses) - 1; i >= 0; i-- {
+		if homeAddresses[i] == 0 {
+			counter = 0
+		} else {
+			counter++
+			if distance[i] > counter {
+				distance[i] = counter
 			}
 		}
 	}
 
-	// чтобы не печатать в цикле - съедает очень много ресурсов :D
 	var res strings.Builder
 	for n, v := range distance {
 		if n == len(distance)-1 {
@@ -98,15 +79,11 @@ func main() {
 	fmt.Println(res.String())
 }
 
-func makeIntSlice(s string, len int) ([]int, bool) {
+func makeIntSlice(s string, len int) []int {
 	result := make([]int, 0, len)
-	isZeroSlice := true
 	for _, v := range strings.Split(s, " ") {
 		i, _ := strconv.Atoi(v)
-		if i != 0 {
-			isZeroSlice = false
-		}
 		result = append(result, i)
 	}
-	return result, isZeroSlice
+	return result
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// https://contest.yandex.ru/contest/22450/run-report/102243563/
+// https://contest.yandex.ru/contest/22450/run-report/102338718/
 
 /*
 Игра «Тренажёр для скоростной печати» представляет собой поле 4x4 из клавиш, на которых — либо точка, либо цифра от одного до девяти.
@@ -45,40 +45,28 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(buf, maxCapacity)
 
-	var s []string
+	var inputData []string
 	for scanner.Scan() {
 		line := scanner.Text()
-		s = append(s, line)
+		inputData = append(inputData, line)
 		if line == "" {
 			break
 		}
 	}
-	k, _ := strconv.Atoi(s[0])
+	k, _ := strconv.Atoi(inputData[0])
 
-	playField := makeIntSlice(s[1:])
+	playField := makeIntSlice(inputData[1:])
 	fmt.Println(countScores(k, playField))
 }
 
-func makeIntSlice(s []string) map[int]int {
-	// Игровое поле фиксированного размера, можно заполнить мапу и потом за О(1) доставать значения
-	playField := map[int]int{
-		1: 0,
-		2: 0,
-		3: 0,
-		4: 0,
-		5: 0,
-		6: 0,
-		7: 0,
-		8: 0,
-		9: 0,
-	}
-
+func makeIntSlice(s []string) []int {
+	playField := make([]int, 9)
 	for _, v := range s {
 		subString := strings.Split(v, "")
 		for _, vs := range subString {
 			if vs != "." {
 				i, _ := strconv.Atoi(vs)
-				playField[i]++
+				playField[i-1]++
 			}
 		}
 	}
@@ -86,11 +74,10 @@ func makeIntSlice(s []string) map[int]int {
 	return playField
 }
 
-func countScores(k int, playField map[int]int) int {
+func countScores(k int, playField []int) int {
 	scores := 0
 	for i := 1; i <= 9; i++ {
-		// избавились от вложенного цикла доставая значения из мапы
-		countNumbers := playField[i]
+		countNumbers := playField[i-1]
 		if countNumbers != 0 && countNumbers <= k*2 {
 			scores++
 		}
