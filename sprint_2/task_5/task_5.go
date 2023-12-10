@@ -1,5 +1,7 @@
 package main
 
+// https://contest.yandex.ru/contest/22779/problems/E/
+
 // <template>
 type ListNode struct {
 	data string

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// https://contest.yandex.ru/contest/22779/problems/F/
+// https://contest.yandex.ru/contest/22779/problems/G/
 
 /*
 Нужно реализовать класс StackMax, который поддерживает операцию определения максимума среди всех элементов в стеке.
@@ -25,26 +25,31 @@ get_max() — напечатать максимальное число в сте
 */
 
 type StackMax struct {
-	stack   []int
-	max     int
-	isEmpty bool
+	stack    []int
+	stackMax []int
+	isEmpty  bool
 }
 
 func NewStackMax() *StackMax {
 	return &StackMax{
-		stack:   make([]int, 0),
-		isEmpty: true,
+		stack:    make([]int, 0),
+		stackMax: make([]int, 0),
+		isEmpty:  true,
 	}
 }
 
 func (s *StackMax) Push(x int) {
-	s.stack = append(s.stack, x)
 	if s.isEmpty {
-		s.max = x
+		s.stack = append(s.stack, x)
+		s.stackMax = append(s.stackMax, x)
 		s.isEmpty = false
 	} else {
-		if x > s.max {
-			s.max = x
+		s.stack = append(s.stack, x)
+		currentMax := s.stackMax[len(s.stackMax)-1]
+		if x > currentMax {
+			s.stackMax = append(s.stackMax, x)
+		} else {
+			s.stackMax = append(s.stackMax, currentMax)
 		}
 	}
 }
@@ -52,23 +57,10 @@ func (s *StackMax) Push(x int) {
 func (s *StackMax) Pop() {
 	if s.isEmpty {
 		fmt.Println("error")
-		return
 	} else {
 		s.stack = s.stack[:(len(s.stack) - 1)]
+		s.stackMax = s.stackMax[:(len(s.stackMax) - 1)]
 		s.isEmpty = len(s.stack) == 0
-		if !s.isEmpty {
-			if len(s.stack) == 1 {
-				s.max = s.stack[0]
-			} else {
-				s.max = s.stack[0]
-				for _, v := range s.stack {
-					if v > s.max {
-						s.max = v
-					}
-				}
-			}
-
-		}
 	}
 }
 
@@ -76,12 +68,20 @@ func (s *StackMax) GetMax() {
 	if s.isEmpty {
 		fmt.Println("None")
 	} else {
-		fmt.Println(s.max)
+		fmt.Println(s.stackMax[len(s.stackMax)-1])
+	}
+}
+
+func (s *StackMax) top() {
+	if s.isEmpty {
+		fmt.Println("error")
+	} else {
+		fmt.Println(s.stack[len(s.stack)-1])
 	}
 }
 
 func main() {
-	const maxCapacity = 10 * 1024 * 1024
+	const maxCapacity = 150 * 1024 * 1024
 	buf := make([]byte, maxCapacity)
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -111,6 +111,9 @@ func processCommands(inputData []string, stack *StackMax) {
 		}
 		if command[0] == "get_max" {
 			stack.GetMax()
+		}
+		if command[0] == "top" {
+			stack.top()
 		}
 	}
 }
