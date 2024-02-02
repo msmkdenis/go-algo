@@ -1,11 +1,6 @@
-10
-put 1 10
-put 2 10
-put 3 10
-put 4 10
-put 5 10
-put 6 10
-put 7 10
-put 8 10
-put 9 10
-put 0 10
+3
+i like dfs and bfs
+i like dfs dfs
+i like bfs with bfs and bfs
+1
+dfs dfs dfs dfs bfs
