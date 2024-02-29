@@ -1,0 +1,143 @@
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"strconv"
+	"strings"
+	"sort"
+)
+
+type Node struct {
+	value    int
+	left   *Node
+	right  *Node
+}
+
+type tTmpStore struct {
+	leftIndex  int
+	rightIndex int
+}
+
+
+func slice2BinaryTree(ss []string, n int, ) (*Node, []int) {
+	if len(ss) == 0 {
+		return nil, nil
+	}
+	var allKeys []int
+	myset := make(map[int]bool)
+	list := make([]*Node, n)
+	m := make(map[int]tTmpStore, n)
+	for i := 0; i < n; i++ {
+		ss[i] = strings.TrimSpace(ss[i])
+		if ss[i] == "" {
+			continue
+		}
+
+		tmp := strings.Split(ss[i], " ")
+		if len(tmp) < 4 {
+			panic("wrong tree data '" + ss[i] + "'")
+		}
+
+		list[i] = &Node{}
+		list[i].value, _ = strconv.Atoi(tmp[1])
+		myset[list[i].value] = true
+		ts := tTmpStore{}
+		if tmp[2] != "-1" {
+			ts.leftIndex, _ = strconv.Atoi(tmp[2])
+		}
+		if tmp[3] != "-1" {
+			ts.rightIndex, _ = strconv.Atoi(tmp[3])
+		}
+
+		m[i] = ts
+	}
+	for key, _ := range myset {
+		allKeys = append(allKeys, key)
+	}
+	sort.Ints(allKeys)
+
+	for i := 0; i < n; i++ {
+		ts := m[i]
+		if ts.leftIndex != 0 {
+			list[i].left = list[ts.leftIndex - 1]
+		}
+		if ts.rightIndex != 0 {
+			list[i].right = list[ts.rightIndex - 1]
+		}
+	}
+
+	return list[0], allKeys
+}
+
+func checkCorrectBst(tree *Node, allKeys map[int]bool) int {
+	if tree == nil {
+		return 0
+	}
+	if allKeys[tree.value] != true {
+		panic("Unknown key")
+	}
+	size := 1
+	
+	if tree.left != nil {
+		if tree.left.value > tree.value {
+			panic("Left child is bigger than its parent")
+		}
+		size += checkCorrectBst(tree.left, allKeys)
+	}
+	if tree.right != nil {
+		if tree.right.value < tree.value {
+			panic("Right child is smaller than its parent")
+		}
+		size += checkCorrectBst(tree.right, allKeys)
+	}
+	return size
+}
+
+// through input.txt
+func main() {
+	bs, err := ioutil.ReadFile("input.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	ss := strings.Split(string(bs), "\n")
+	if len(ss) < 2 {
+		panic("wrong input")
+	}
+	test_type := ss[0]
+	n, _ := strconv.Atoi(ss[1])
+	tree := &Node{}
+	tree = nil
+	allKeys := make([]int, 0)
+	if n > 0 {
+		tree, allKeys = slice2BinaryTree(ss[2:], n)
+	}
+	if test_type == "correctness" {
+		toRemove, _ := strconv.Atoi(ss[n + 2])
+		tree = remove(tree, toRemove)
+		myset := make(map[int]bool)
+		expectedSize := len(allKeys)
+
+		for _, key := range allKeys {
+			myset[key] = true
+			if key == toRemove {
+				expectedSize -= 1
+			}
+		}
+		actualSize := checkCorrectBst(tree, myset)
+		if actualSize != expectedSize {
+			panic("Size of Bst does not match with the answer")
+		}
+		fmt.Println("Correct")
+	} else {
+		for _, key := range allKeys {
+			tree =remove(tree, key)
+		}
+		if tree != nil {
+			fmt.Println("FAIL: non-null")
+		} else {
+			fmt.Println("OK: null")
+		}
+	}
+}

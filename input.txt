@@ -1,6 +1,4 @@
-3
-i like dfs and bfs
-i like dfs dfs
-i like bfs with bfs and bfs
+correctness
 1
-dfs dfs dfs dfs bfs
+1 5 -1 -1
+5
