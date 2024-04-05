@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// https://contest.yandex.ru/contest/25070/run-report/111324850/
+// https://contest.yandex.ru/contest/25070/run-report/111381926/
 
 /*
 -- ПРИНЦИП РАБОТЫ --
@@ -89,6 +89,8 @@ func PrimMaxST(graph *Graph) (int, bool) {
 	heap.Init(&pq)
 	heap.Push(&pq, &Item{value: 0, priority: 0})
 
+	var visitedCount int
+
 	for len(pq) > 0 {
 		item := heap.Pop(&pq).(*Item)
 		u := item.value
@@ -98,6 +100,7 @@ func PrimMaxST(graph *Graph) (int, bool) {
 		}
 
 		visited[u] = true
+		visitedCount++
 		maxWeight += item.priority
 
 		for _, edge := range graph.edges[u] {
@@ -110,12 +113,10 @@ func PrimMaxST(graph *Graph) (int, bool) {
 		}
 	}
 
-	// проверка на то, что мы посетили все вершины графа
-	for i := 0; i < v; i++ {
-		if !visited[i] {
-			return 0, false
-		}
+	if visitedCount != v {
+		return 0, false
 	}
+
 	return maxWeight, true
 }
 
