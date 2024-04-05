@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-// https://contest.yandex.ru/contest/25070/run-report/111327952/
-
 /*
 -- ПРИНЦИП РАБОТЫ --
   Исходя из условий задачи мы можем представить карту железных дорог в виде ориентированного графа.
@@ -76,7 +74,7 @@ func (s *Stack) Size() int {
 func main() {
 	input := getInputData()
 	towns, _ := strconv.Atoi(strings.Split(input[0], " ")[0])
-	graph := make(map[int][]int, towns)
+	graph := make([][]int, towns+1)
 
 	for i := 1; i < len(input); i++ {
 		s := strings.Split(input[i], "")
@@ -86,7 +84,7 @@ func main() {
 			if v == "R" {
 				from, to = to, from
 			}
-			if _, ok := graph[from]; !ok {
+			if len(graph[from]) == 0 {
 				graph[from] = make([]int, 0)
 			}
 			graph[from] = append(graph[from], to)
@@ -111,7 +109,7 @@ func main() {
 	fmt.Println("YES")
 }
 
-func dfs(startVertex int, color []string, graph map[int][]int) bool {
+func dfs(startVertex int, color []string, graph [][]int) bool {
 	stack := NewStack()
 	stack.Push(startVertex)
 
